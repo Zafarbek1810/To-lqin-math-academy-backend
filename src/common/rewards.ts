@@ -15,7 +15,11 @@ export const LESSON_LOCK_HOURS = 24;
 export function calcLessonReward(
   attendance: 'present' | 'absent',
   homework: 'full' | 'partial' | 'none',
+  rewardsEnabled = true,
 ): { attendanceReward: number; homeworkReward: number; total: number } {
+  if (!rewardsEnabled) {
+    return { attendanceReward: 0, homeworkReward: 0, total: 0 };
+  }
   const attendanceReward = ATTENDANCE_REWARD[attendance];
   const homeworkReward =
     attendance === 'present' ? HOMEWORK_REWARD[homework] : 0;

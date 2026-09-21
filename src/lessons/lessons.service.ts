@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { LESSON_LOCK_HOURS, calcLessonReward } from '../common/rewards';
 import { GroupsService } from '../groups/groups.service';
 import { StudentsService } from '../students/students.service';
+import { SubjectsService } from '../subjects/subjects.service';
 import { User } from '../users/user.entity';
 import { Role } from '../common/enums';
 import { SaveLessonDto } from './dto/lesson.dto';
@@ -23,6 +24,7 @@ export class LessonsService {
     private attendances: Repository<LessonAttendance>,
     private groupsService: GroupsService,
     private studentsService: StudentsService,
+    private subjectsService: SubjectsService,
   ) {}
 
   async findAll(filters?: { groupId?: string; teacherId?: string }) {
@@ -71,6 +73,8 @@ export class LessonsService {
       user.role === Role.TEACHER ? user.id : group.teacherId;
     const date = dto.date ?? new Date().toISOString().slice(0, 10);
     const lessonId = `l${Date.now()}`;
+    const subject = await this.subjectsService.findOne(group.subjectId);
+    const rewardsEnabled = subject.rewardsEnabled !== false;
 
     const lesson = await this.lessons.save(
       this.lessons.create({
@@ -84,7 +88,11 @@ export class LessonsService {
 
     const rows: LessonAttendance[] = [];
     for (const row of dto.attendances) {
-      const rewards = calcLessonReward(row.attendance, row.homework);
+      const rewards = calcLessonReward(
+        row.attendance,
+        row.homework,
+        rewardsEnabled,
+      );
       const attendance = await this.attendances.save(
         this.attendances.create({
           id: `la${Date.now()}${Math.random().toString(36).slice(2, 7)}`,

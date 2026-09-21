@@ -37,7 +37,7 @@ export class PaymentsService {
       method: dto.method,
       month: dto.month,
       status: dto.status ?? PaymentStatus.PAID,
-      date: new Date().toISOString().slice(0, 10),
+      date: dto.date ?? new Date().toISOString().slice(0, 10),
       receptionId,
     });
     return this.repo.save(payment);

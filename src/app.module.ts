@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { isProduction } from './common/config';
 import { JwtAuthGuard, RolesGuard } from './common/guards';
+import { HealthController } from './common/health.controller';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ExamResult } from './exams/exam-result.entity';
 import { Exam } from './exams/exam.entity';
@@ -30,23 +32,43 @@ import { UsersModule } from './users/users.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRoot({
-      type: 'better-sqlite3',
-      database: process.env.DB_PATH || 'tolqin.sqlite',
-      entities: [
-        User,
-        Subject,
-        Group,
-        Student,
-        Product,
-        Order,
-        Exam,
-        ExamResult,
-        Lesson,
-        LessonAttendance,
-        Payment,
-      ],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        host: config.get<string>('DB_HOST', 'localhost'),
+        port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
+        username: config.get<string>('DB_USER', 'postgres'),
+        password: config.get<string>('DB_PASSWORD', 'postgres'),
+        database: config.get<string>('DB_NAME', 'tolqin'),
+        // Beget Cloud kabi boshqariladigan bazalar uchun: DB_SSL=true
+        ssl:
+          config.get<string>('DB_SSL', 'false') === 'true'
+            ? { rejectUnauthorized: false }
+            : false,
+        entities: [
+          User,
+          Subject,
+          Group,
+          Student,
+          Product,
+          Order,
+          Exam,
+          ExamResult,
+          Lesson,
+          LessonAttendance,
+          Payment,
+        ],
+        // Production da default `false`: jadval sxemasini avtomatik o'zgartirish
+        // ma'lumot yo'qolishiga olib kelishi mumkin. Birinchi ishga tushirishda
+        // jadvallarni yaratish uchun vaqtincha DB_SYNC=true qilib qo'yiladi.
+        synchronize:
+          config.get<string>(
+            'DB_SYNC',
+            isProduction() ? 'false' : 'true',
+          ) === 'true',
+      }),
     }),
     AuthModule,
     UsersModule,
@@ -61,6 +83,7 @@ import { UsersModule } from './users/users.module';
     DashboardModule,
     SeedModule,
   ],
+  controllers: [HealthController],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },

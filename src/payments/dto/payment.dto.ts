@@ -1,4 +1,5 @@
 import {
+  IsDateString,
   IsEnum,
   IsNumber,
   IsOptional,
@@ -23,6 +24,10 @@ export class CreatePaymentDto {
 
   @IsString()
   month: string;
+
+  @IsOptional()
+  @IsDateString()
+  date?: string;
 
   @IsOptional()
   @IsEnum(PaymentStatus)

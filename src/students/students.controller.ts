@@ -18,13 +18,16 @@ export class StudentsController {
   constructor(private studentsService: StudentsService) {}
 
   @Get()
-  findAll(@Query('groupId') groupId?: string) {
-    return this.studentsService.findAll(groupId);
+  findAll(
+    @Query('groupId') groupId?: string,
+    @Query('month') month?: string,
+  ) {
+    return this.studentsService.findAll(groupId, month);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.studentsService.findOne(id);
+  findOne(@Param('id') id: string, @Query('month') month?: string) {
+    return this.studentsService.findOne(id, month);
   }
 
   @Post()

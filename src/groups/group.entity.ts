@@ -34,7 +34,7 @@ export class Group {
   @Column({ default: false })
   lessonLocked: boolean;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   lockExpiresAt?: Date | null;
 
   @CreateDateColumn()

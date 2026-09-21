@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tolqin-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tolqin
+    ports:
+      - "5432:5432"
+    volumes:
+      - tolqin_pg_data:/var/lib/postgresql/data
+
+volumes:
+  tolqin_pg_data:

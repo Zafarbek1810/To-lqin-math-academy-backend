@@ -36,13 +36,13 @@ export class Student {
   @Column({ type: 'integer', default: 0 })
   rewardSpent: number;
 
-  @Column({ type: 'real', default: 0 })
+  @Column({ type: 'float', default: 0 })
   attendanceRate: number;
 
-  @Column({ type: 'real', default: 0 })
+  @Column({ type: 'float', default: 0 })
   homeworkRate: number;
 
-  @Column({ type: 'real', default: 0 })
+  @Column({ type: 'float', default: 0 })
   examAvg: number;
 
   @CreateDateColumn()
