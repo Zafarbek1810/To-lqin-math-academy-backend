@@ -28,6 +28,12 @@ export enum OrderStatus {
   CANCELLED = 'cancelled',
 }
 
+export enum ApplicationStatus {
+  NEW = 'new',
+  CONTACTED = 'contacted',
+  CLOSED = 'closed',
+}
+
 export enum ExamStatus {
   UPCOMING = 'upcoming',
   COMPLETED = 'completed',

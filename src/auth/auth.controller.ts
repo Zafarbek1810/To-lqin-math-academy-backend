@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CurrentUser, Public } from '../common/decorators';
 import { User } from '../users/user.entity';
 
@@ -17,5 +18,10 @@ export class AuthController {
   @Get('me')
   me(@CurrentUser() user: User) {
     return this.authService.me(user.id);
+  }
+
+  @Patch('me')
+  updateMe(@CurrentUser() user: User, @Body() dto: UpdateProfileDto) {
+    return this.authService.updateProfile(user.id, dto);
   }
 }

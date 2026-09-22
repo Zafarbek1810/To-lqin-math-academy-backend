@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -6,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -49,5 +51,39 @@ export class AuthService {
     if (!user) throw new UnauthorizedException();
     const { password: _, ...safe } = user;
     return safe;
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    const user = await this.usersService.findById(userId);
+    if (!user) throw new UnauthorizedException();
+
+    const name = dto.name?.trim();
+    const username = dto.username?.trim();
+    const nextPassword = dto.password?.trim();
+
+    if (name !== undefined && name.length < 2) {
+      throw new BadRequestException(
+        "Ism kamida 2 ta belgidan iborat bo'lishi kerak",
+      );
+    }
+    if (username !== undefined && username.length < 3) {
+      throw new BadRequestException(
+        "Username kamida 3 ta belgidan iborat bo'lishi kerak",
+      );
+    }
+    if (nextPassword) {
+      if (!dto.currentPassword) {
+        throw new BadRequestException('Joriy parolni kiriting');
+      }
+      const ok = await bcrypt.compare(dto.currentPassword, user.password);
+      if (!ok) throw new BadRequestException("Joriy parol noto'g'ri");
+    }
+
+    return this.usersService.update(userId, {
+      name,
+      username,
+      phone: dto.phone,
+      password: nextPassword || undefined,
+    });
   }
 }

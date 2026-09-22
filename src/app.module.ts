@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Application } from './applications/application.entity';
+import { ApplicationsModule } from './applications/applications.module';
 import { AuthModule } from './auth/auth.module';
 import { isProduction } from './common/config';
 import { JwtAuthGuard, RolesGuard } from './common/guards';
@@ -48,6 +50,7 @@ import { UsersModule } from './users/users.module';
             ? { rejectUnauthorized: false }
             : false,
         entities: [
+          Application,
           User,
           Subject,
           Group,
@@ -71,6 +74,7 @@ import { UsersModule } from './users/users.module';
       }),
     }),
     AuthModule,
+    ApplicationsModule,
     UsersModule,
     SubjectsModule,
     GroupsModule,
